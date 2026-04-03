@@ -1,13 +1,26 @@
 from langchain_core.documents import Document
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores import FAISS
 import os
 
 
 class MedicalVectorStore:
-    def __init__(self, save_path="backend/faiss_index"):
-        self.save_path = save_path
-        self.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+
+    def __init__(self, save_path=None):
+        if save_path:
+            self.save_path = save_path
+        else:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            self.save_path = os.path.join(current_dir, "faiss_index")
+
+        # Ensure this matches the Key in your Render Environment
+        hf_token = os.getenv("HUGGINGFACEHUB_API_TOKEN", "")
+
+        # This is the new way to do it. It still uses 0MB of RAM!
+        self.embeddings = HuggingFaceEndpointEmbeddings(
+            huggingfacehub_api_token=hf_token,
+            model="sentence-transformers/all-MiniLM-L6-v2"
+        )
 
     def build_and_save(self, structured_chunks: list[dict]):
         """
