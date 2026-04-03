@@ -1,9 +1,16 @@
 # backend/main.py
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 import tempfile
+
+# Find the folder named 'public'
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.dirname(current_dir)
+public_path = os.path.join(root_dir, "public")
 
 # Import our custom AI Engines (using absolute imports)
 from backend.pdf_processor import extract_text_from_pdf
@@ -14,6 +21,8 @@ from backend.chat_engine import ChatEngine
 
 # 1. Initialize the Web App
 app = FastAPI(title="MediSimple AI API")
+
+app.mount("/public", StaticFiles(directory=public_path), name="public")
 
 # 2. Allow the frontend to talk to this backend (CORS)
 app.add_middleware(
@@ -103,7 +112,7 @@ async def chat_with_ai(request: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# --- HEALTH CHECK ---
 @app.get("/")
 def read_root():
-    return {"status": "MediSimple API is running!"}
+    # This sends your index.html file to the user's browser
+    return FileResponse(os.path.join(public_path, "index.html"))
