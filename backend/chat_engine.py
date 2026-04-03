@@ -12,7 +12,7 @@ class ChatEngine:
         self.llm = ChatGroq(
             api_key=os.getenv("GROQ_API_KEY"),
             model="llama-3.3-70b-versatile",
-            temperature=0.2  # Slight temperature for conversational tone, but still very grounded
+            temperature=0  # Slight temperature for conversational tone, but still very grounded
         )
 
         # Simple in-memory storage for chat history.
